@@ -1,0 +1,3 @@
+#!@bash@
+
+wlogout -b 6 -m 470

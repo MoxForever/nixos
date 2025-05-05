@@ -1,4 +1,8 @@
-{ config, pkgs, ... }:
+{ environment, programs, pkgs, systemd, hardware, ... }:
+
+let
+  hyprcommandPkg = pkgs.callPackage ./../programs/hyprcommand/default.nix {};
+in
 
 {
   programs.hyprland = {
@@ -7,7 +11,8 @@
   };
 
   environment.systemPackages = with pkgs; [
-    hyprland alacritty waybar wofi copyq
+    hyprland hyprpaper hyprlock hypridle hyprcommandPkg hyprpolkitagent
+    alacritty waybar rofi copyq socat swaynotificationcenter resources
   ];
 
   hardware.nvidia.open = true;

@@ -1,0 +1,24 @@
+#!@bash@
+
+SOCKET_PATH="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
+MAX_LENGTH=80
+
+if [[ ! -S "$SOCKET_PATH" ]]; then
+    exit 1
+fi
+
+echo "$USER"
+
+socat -U - "$SOCKET_PATH" | while read -r line; do
+    if [[ "$line" == activewindow* || "$line" == workspace* ]]; then
+        active_window=$(hyprctl activewindow -j | jq -r '.title' 2>/dev/null)
+        if [[ -z "$active_window" || "$active_window" == "null" || "$active_window" == "" ]]; then
+            echo "$USER"
+        elif [[ ${#active_window} -gt $MAX_LENGTH ]]; then
+            echo "${active_window:0:$((MAX_LENGTH-3))}..."
+        else
+            echo "$active_window"
+        fi 
+    fi
+done
+

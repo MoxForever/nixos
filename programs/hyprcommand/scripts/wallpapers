@@ -1,0 +1,65 @@
+#!@bash@
+
+if [ -z "$WALLPAPER_DIR" ]; then
+    echo "Error: WALLPAPER_DIR is not set." >&2
+    exit 1
+fi
+
+CONFIG="$WALLPAPER_DIR/.selected.conf"
+
+until hyprctl hyprpaper 2>&1 | grep -q "invalid command"; do
+    echo "Waiting for hyprpaper to start..."
+    sleep 1
+done
+
+for wallpaper in "$WALLPAPER_DIR"/*.{jpg,png,webp}; do
+    [ -e "$wallpaper" ] || continue
+    echo -n "Loading $wallpaper: "
+    if ! hyprctl hyprpaper preload "$wallpaper"; then
+        echo "Failed" >&2
+    fi
+done
+
+input=$@
+
+if [ -z "$input" ]; then
+    if [ -f "$CONFIG" ]; then
+        input=$(cat "$CONFIG")
+    else
+        echo "Error: No input provided and '$(basename $CONFIG)' not found." >&2
+        exit 1
+    fi
+fi
+
+if [[ "$input" =~ ^-?[0-9]+$ ]]; then
+    input=$((input - 1))
+    readarray -t files < <(find "$WALLPAPER_DIR" -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.png" -o -iname "*.webp" \) | sort)
+    if [ "$input" -ge "${#files[@]}" ] || [ "$input" -lt 0 ]; then
+        echo "Error: Index out of range. Total files: ${#files[@]}" >&2
+        exit 1
+    fi
+    wallpaper_name=$(basename "${files[$input]}")
+else
+    if [ ! -f "$WALLPAPER_DIR/$input" ]; then
+        echo "Error: Wallpaper '$input' not found in '$WALLPAPER_DIR'." >&2
+        exit 1
+    fi
+    wallpaper_name="$input"
+fi
+
+wallpaper_full="$WALLPAPER_DIR/$wallpaper_name"
+echo "Selected wallpaper: $wallpaper_name"
+
+echo "$wallpaper_name" > "$CONFIG"
+rm "$WALLPAPER_DIR/.hyprlock"
+ln -s $wallpaper_full "$WALLPAPER_DIR/.hyprlock"
+
+echo -n "Set wallpaper: "
+if ! hyprctl hyprpaper wallpaper ",$wallpaper_full"; then
+    echo "Failed to set wallpaper: $wallpaper_name" >&2
+    exit 1
+fi
+
+echo -n "Unload unused: "
+hyprctl hyprpaper unload unused
+

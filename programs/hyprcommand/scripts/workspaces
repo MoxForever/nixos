@@ -1,0 +1,205 @@
+#!@python3@
+from contextlib import suppress
+from dataclasses import dataclass
+import json
+import os
+import re
+import subprocess
+from configparser import ConfigParser
+import sys
+from typing import Any
+
+
+XDG_RUNTIME_DIR = os.environ.get("XDG_RUNTIME_DIR")
+HYPRLAND_INSTANCE_SIGNATURE = os.environ.get("HYPRLAND_INSTANCE_SIGNATURE")
+SOCKET_PATH = f"{XDG_RUNTIME_DIR}/hypr/{HYPRLAND_INSTANCE_SIGNATURE}/.socket2.sock"
+
+
+@dataclass
+class Workspace:
+    id: int
+    is_urgent: bool = False
+    last_active_app: dict[str, Any] | None = None
+
+
+@dataclass
+class WorkspacesData:
+    active_workspace: int
+    workspaces: dict[int, Workspace]
+
+
+def get_window_data(address: str) -> dict[str, Any] | None:
+    result = subprocess.run(
+        ["hyprctl", "clients", "-j"], text=True, capture_output=True
+    )
+    data = json.loads(result.stdout)
+    for client in data:
+        if client["address"] == f"0x{address}":
+            return client
+
+    return None
+
+
+def get_all_windows_data() -> list[dict[str, Any]]:
+    result = subprocess.run(
+        ["hyprctl", "clients", "-j"], text=True, capture_output=True
+    )
+    return json.loads(result.stdout)
+
+
+def get_all_workspaces_data() -> list[dict[str, Any]]:
+    result = subprocess.run(
+        ["hyprctl", "workspaces", "-j"], text=True, capture_output=True
+    )
+    return json.loads(result.stdout)
+
+
+def stdout_widget(workspaces_data: WorkspacesData, config: ConfigParser):
+    result_indexed: dict[int, str] = {}
+    last_workspace_id = config.getint("General", "WorkspacesCount")
+
+    default_workspace_icon = config.get("IconsDefault", "DefaultWorkspace")
+    sorted_workspaces = sorted(workspaces_data.workspaces.values(), key=lambda x: x.id)
+    for workspace in sorted_workspaces:
+        if workspace.id < 0:
+            continue
+
+        last_workspace_id = max(last_workspace_id, workspace.id)
+        
+        if workspace.id == workspaces_data.active_workspace:
+            result_indexed[workspace.id] = config.get("IconsDefault", "ActiveWorkspace")
+
+        elif workspace.is_urgent:
+            result_indexed[workspace.id] = config.get("IconsDefault", "UrgentWorkspace")
+
+        elif workspace.last_active_app:
+            app_icon: str | None = None
+            for section in filter(lambda i: i.startswith("Icon-"), config.sections()):
+                icon = section.split("-", 1)[1]
+                for check in config[section]:
+                    if not re.match(
+                        config.get(section, check),
+                        str(workspace.last_active_app[check]),
+                    ):
+                        break
+                else:
+                    app_icon = icon
+                    break
+
+            if app_icon:
+                result_indexed[workspace.id] = app_icon
+
+    result: list[str] = []
+    for i in range(1, last_workspace_id + 1):
+        if i in result_indexed:
+            result.append(result_indexed[i])
+        else:
+            result.append(default_workspace_icon)
+
+    sys.stdout.write(json.dumps({"text": " ".join(result)}) + "\n")
+    sys.stdout.flush()
+
+
+def handle_event(event_raw, config: ConfigParser, workspace_data: WorkspacesData):
+    event, args_raw = event_raw.split(">>", 1)
+    args = args_raw.split(",")
+
+    if event == "workspacev2":
+        workspace_data.active_workspace = int(args[0])
+        current_workspace = workspace_data.workspaces.get(int(args[0]))
+        if current_workspace:
+            current_workspace.is_urgent = False
+
+    elif event == "activewindowv2":
+        window = get_window_data(args[0])
+        if window:
+            workspace_id = window["workspace"]["id"]
+            if workspace_id not in workspace_data.workspaces:
+                return
+
+            workspace_data.workspaces[workspace_id].last_active_app = window
+
+    elif event == "createworkspace":
+        if not args[0].isnumeric():
+            return
+
+        workspace_id = int(args[0])
+        workspace_data.workspaces[workspace_id] = Workspace(id=workspace_id)
+
+    elif event == "destroyworkspace":
+        if not args[0].isnumeric():
+            return
+
+        if int(args[0]) not in workspace_data.workspaces:
+            return
+
+        workspace_data.workspaces.pop(int(args[0]))
+
+    elif event == "urgent":
+        window = get_window_data(args[0])
+        if window:
+            workspace_id = window["workspace"]["id"]
+            if workspace_id == workspace_data.active_workspace:
+                return
+            workspace_data.workspaces[workspace_id].is_urgent = True
+
+    else:
+        return
+
+    stdout_widget(workspace_data, config)
+
+
+def init_workspaces_data():
+    workspaces_data_raw = get_all_workspaces_data()
+    workspace_data_sorted = sorted(workspaces_data_raw, key=lambda x: x["id"])
+    windows_data_raw = get_all_windows_data()
+    windows_map = {window["address"]: window for window in windows_data_raw}
+
+    workspace_data = WorkspacesData(active_workspace=1, workspaces={})
+    for ws in workspace_data_sorted:
+        if ws["lastwindow"] == "0x0":
+            last_window = None
+        else:
+            last_window = windows_map[ws["lastwindow"]]
+        
+        workspace_data.workspaces[ws["id"]] = Workspace(
+            id=ws["id"], last_active_app=last_window
+        )
+
+    return workspace_data
+
+
+def init_config() -> ConfigParser:
+    home = os.environ.get("HOME")
+    config = ConfigParser()
+    if not home:
+        raise ValueError("$HOME environment variable is not set")
+    else:
+        config.read(os.path.join(home, ".config/waybar/workspaces.ini"))
+
+    return config
+
+
+def main():
+    if not os.path.exists(SOCKET_PATH):
+        print(f"Socket path does not exist: {SOCKET_PATH}")
+        return
+
+    config = init_config()
+    workspace_data = init_workspaces_data()
+
+    stdout_widget(workspace_data, config)
+
+    with suppress(KeyboardInterrupt):
+        with subprocess.Popen(
+            ["socat", "-U", "-", SOCKET_PATH], stdout=subprocess.PIPE, text=True
+        ) as socat_proc:
+            if socat_proc.stdout is None:
+                return
+
+            for line in socat_proc.stdout:
+                handle_event(line.strip(), config, workspace_data)
+
+
+if __name__ == "__main__":
+    main()

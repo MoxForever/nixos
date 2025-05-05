@@ -1,0 +1,27 @@
+#!@bash@
+
+SOCKET="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
+CONFIG_FILE="$HOME/.config/hypr/hyprland/style.conf"
+
+active_default=$(grep -oP 'col.active_border\s*=\s*\K.*' "$CONFIG_FILE")
+inactive_default=$(grep -oP 'col.inactive_border\s*=\s*\K.*' "$CONFIG_FILE")
+
+echo "Active border: $active_default"
+echo "Inactive border: $inactive_default"
+
+is_switched_to_one=0
+socat -U - "$SOCKET" | while read -r event; do
+    workspace_id=$(hyprctl activeworkspace -j | jq -r '.id')
+    
+    num_windows=$(hyprctl clients -j | jq --arg workspace_id "$workspace_id" \
+        '[.[] | select(.workspace.id == ($workspace_id | tonumber))] | length')
+    
+    if [[ "$num_windows" -le 1 ]] && [[ is_switched_to_one -eq 0 ]]; then
+        hyprctl keyword general:col.active_border "$inactive_default"
+	is_switched_to_one=1
+    elif [[ "$num_windows" -gt 1 ]] && [[ is_switched_to_one -eq 1 ]]; then
+        hyprctl keyword general:col.active_border "$active_default"
+	is_switched_to_one=0
+    fi
+done
+

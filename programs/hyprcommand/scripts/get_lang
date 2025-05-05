@@ -1,0 +1,3 @@
+#!@bash@
+
+hyprctl devices -j | jq -r '.keyboards[] | select(.main == true) .active_keymap' | cut -c 1-2 | tr 'A-Z' 'a-z'

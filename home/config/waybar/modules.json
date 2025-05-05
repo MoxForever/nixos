@@ -1,0 +1,125 @@
+{
+    // Notifications
+    "custom/notification": {
+        "tooltip": false,
+        "format": "{icon}",
+        "format-icons": {
+            "notification": "<span foreground='red'><sup>*</sup></span>",
+            "none": "",
+            "dnd-notification": "<span foreground='red'><sup>*</sup></span>",
+            "dnd-none": "",
+            "inhibited-notification": "<span foreground='red'><sup>*</sup></span>",
+            "inhibited-none": "",
+            "dnd-inhibited-notification": "<span foreground='red'><sup>*</sup></span>",
+            "dnd-inhibited-none": ""
+        },
+        "return-type": "json",
+        "exec-if": "which swaync-client",
+        "exec": "swaync-client -swb",
+        "on-click": "swaync-client -t -sw",
+        "on-click-right": "swaync-client -d -sw",
+        "escape": true
+    },
+
+    // Workspaces
+    "custom/workspaces": {
+	"exec": "hyprcommand workspaces",
+        "return-type": "json",
+	"restart-interval": 1,
+	"escape": true
+    },
+
+    // Wofi Application Launcher
+    "custom/appmenu": {
+        "format": "Apps",
+        "on-click": "rofi -show drun",
+        "tooltip": false
+    },
+
+    // Window name or username
+    "custom/window_user": {
+	"exec": "hyprcommand window_user",
+	"restart-interval": 1,
+	"escape": true
+    },
+
+    // Power Menu
+    "custom/exit": {
+        "format": "",
+        "on-click": "hyprcommand wlogout",
+        "tooltip": false
+    },
+
+    // System tray
+    "tray": {
+        "icon-size": 16,
+        "spacing": 10
+    },
+
+    // Clock
+    "clock": {
+        "format": "{:%H:%M %a}",
+        "on-click": "gnome-calendar",
+        "timezone": "",
+        "tooltip": false
+    },
+
+    // Language
+    "hyprland/language": {
+        "format": "{short}"
+    },
+
+    // Network
+    "network": {
+        "format": "{ifname}",
+        "format-wifi": " {signalStrength}%",
+        "format-ethernet": "  {ifname}",
+        "format-disconnected": "Disconnected ⚠",
+        "tooltip-format": " {ifname} via {gwaddri}",
+        "tooltip-format-wifi": "  {ifname} @ {essid}\nIP: {ipaddr}\nStrength: {signalStrength}%\nFreq: {frequency}MHz\nUp: {bandwidthUpBits} Down: {bandwidthDownBits}",
+        "tooltip-format-ethernet": " {ifname}\nIP: {ipaddr}\n up: {bandwidthUpBits} down: {bandwidthDownBits}",
+        "tooltip-format-disconnected": "Disconnected",
+        "max-length": 50,
+        "on-click": "iwgtk"
+    },
+
+    // Battery
+    "battery": {
+        "states": {
+            "warning": 30,
+            "critical": 15
+        },
+        "format": "{icon} {capacity}%",
+        "format-charging": "  {capacity}%",
+        "format-plugged": "  {capacity}%",
+        "format-alt": "{icon}  {time}",
+        "format-icons": [" ", " ", " ", " ", " "]
+    },
+
+    // Pulseaudio
+    "pulseaudio": {
+        "scroll-step": 5,
+        "format": "{icon}  {volume}%",
+        "format-bluetooth": "{volume}% {icon} {format_source}",
+        "format-bluetooth-muted": " {icon} {format_source}",
+        "format-muted": " {format_source}",
+        "format-source": "{volume}% ",
+        "format-source-muted": "",
+        "format-icons": {
+            "headphone": " ",
+            "hands-free": " ",
+            "headset": " ",
+            "phone": " ",
+            "portable": " ",
+            "car": " ",
+            "default": ["", "", ""]
+        },
+        "on-click": "pavucontrol"
+    },
+
+    // Backlight
+    "backlight": {
+        "format": " {percent}%",
+        "scroll-step": 17
+    }
+}

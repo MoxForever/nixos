@@ -1,0 +1,15 @@
+#!@bash@
+
+hyprctl dispatch exec "[workspace special silent; alpha 0]" deckboard
+
+SOCKET="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
+
+socat -U - "$SOCKET" | while read -r line; do
+	if [[ "$line" == openwindow* && "$line" == *deckboard* ]]; then
+		window_id=$(echo "$line" | cut -d ',' -f 1 | sed 's/openwindow>>//')
+		hyprctl dispatch closewindow "address:0x$window_id"
+		break
+	fi
+done
+
+wait %1
