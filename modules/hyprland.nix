@@ -11,7 +11,7 @@ in
   };
 
   environment.systemPackages = with pkgs; [
-    hyprland hyprpaper hyprlock hypridle hyprcommandPkg hyprpolkitagent
+    hyprland hyprpaper hyprlock hypridle hyprpicker hyprshot hyprcommandPkg hyprpolkitagent
     alacritty waybar rofi copyq socat swaynotificationcenter resources
   ];
 

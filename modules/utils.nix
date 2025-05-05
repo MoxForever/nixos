@@ -3,8 +3,7 @@
 {
   services.xserver.excludePackages = with pkgs; [ xterm ];
   environment.systemPackages = with pkgs; [
-    vim mesa libglvnd vscode firefox nemo telegram-desktop
-    neofetch git python3 gparted htop
+    vim mesa libglvnd nemo neofetch git python3 python3Packages.pip gparted htop
   ];
 
   programs = {

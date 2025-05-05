@@ -1,4 +1,4 @@
-#!@bash@
+#!/bin/bash
 
 SOCKET_PATH="$XDG_RUNTIME_DIR/hypr/$HYPRLAND_INSTANCE_SIGNATURE/.socket2.sock"
 MAX_LENGTH=80

@@ -1,4 +1,4 @@
-#!@bash@
+#!/bin/bash
 
 if [ -z "$WALLPAPER_DIR" ]; then
     echo "Error: WALLPAPER_DIR is not set." >&2

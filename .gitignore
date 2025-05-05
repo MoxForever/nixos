@@ -1,2 +1,6 @@
+# nixos & nix builds
 hardware-configuration.nix
 programs/*/result
+
+# vim 
+*.swp

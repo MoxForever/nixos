@@ -3,22 +3,20 @@
 
 pkgs.stdenv.mkDerivation {
   pname = "hyprcommand";
-  version = "1.0";
+  version = "local";
 
   src = ./.;
 
   nativeBuildInputs = [ pkgs.makeWrapper ];
 
-  buildPhase = ''
-    substituteAll hyprcommand.sh hyprcommand
-    chmod +x hyprcommand
-  '';
-
   installPhase = ''
-    mkdir -p $out/bin
     mkdir -p $out/bin/scripts
     cp -r scripts/* $out/bin/scripts/
-    cp hyprcommand $out/bin/
+    cp hyprcommand.sh $out/bin/hyprcommand
+    chmod +x $out/bin/hyprcommand
+    chmod +x $out/bin/scripts/*
+
+    patchShebangs $out/bin
 
     wrapProgram $out/bin/hyprcommand \
       --prefix PATH : ${pkgs.jq}/bin:${pkgs.socat}/bin

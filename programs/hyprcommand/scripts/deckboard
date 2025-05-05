@@ -1,4 +1,4 @@
-#!@bash@
+#!/bin/bash
 
 hyprctl dispatch exec "[workspace special silent; alpha 0]" deckboard
 
