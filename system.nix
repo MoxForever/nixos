@@ -1,4 +1,4 @@
-{ boot, networking, time, i18n, system, hardware, pkgs, services, ... }:
+{ boot, networking, time, i18n, system, hardware, pkgs, services, options, ... }:
 
 {
   boot = {
@@ -42,7 +42,7 @@
     polkit.enable = true;
     pam.services = {
       login.enable = true;
-      gdm.enable = services.xserver.displayManager.gdm.enable;
+      gdm.enable = options.services.xserver.displayManager.gdm.enable or false;
       sshd.enable = true;
     };
   };
