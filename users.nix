@@ -1,17 +1,10 @@
-{ pkgs, users, builtins, ... }:
+{ pkgs, users, ... }:
 
 {
-  imports = [
-    <home-manager/nixos>
-  ];
-
+  users.users.root.shell = pkgs.fish;
   users.users.moxforever = {
     isNormalUser = true;
     shell = pkgs.fish;
     extraGroups = [ "networkmanager" "wheel" ];
-  };
-
-  home-manager.users.moxforever = import ./home/home.nix {
-    username = "moxforever";
   };
 }

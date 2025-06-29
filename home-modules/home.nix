@@ -1,0 +1,29 @@
+{ config, lib, pkgs, ... }:
+
+let
+  inherit (lib) mkIf mkMerge filterAttrs hasAttr pathExists tryEval isAttrs;
+
+  defaultHomeConfig = import ./home-default.nix;
+  validUsers = filterAttrs (_: u: u.isNormalUser or false) config.users.users;
+  isValidHomeConfig = cfg:
+    isAttrs cfg &&
+    hasAttr "home.username" cfg &&
+    hasAttr "home.stateVersion" cfg;
+
+  getUserConfig = username:
+    let
+      homePath = "/home/${username}/.config/home-manager/home.nix";
+      imported =
+        if pathExists homePath then
+          let result = tryEval (import homePath);
+          in if result.success && isValidHomeConfig result.value
+             then result.value
+             else defaultHomeConfig
+        else defaultHomeConfig;
+    in {
+      home-manager.users.${username} = imported;
+    };
+
+in {
+  config = mkMerge (map getUserConfig (builtins.attrNames validUsers));
+}
