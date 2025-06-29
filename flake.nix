@@ -12,7 +12,10 @@
     in {
       nixosConfigurations.moxforever = nixpkgs.lib.nixosSystem {
         inherit system;
-        modules = [ "${self}/configuration.nix" ];
+        modules = [
+          "${self}/hardware-configuration.nix"
+          "${self}/configuration.nix"
+        ];
         specialArgs = { inherit inputs; };
       };
     };
