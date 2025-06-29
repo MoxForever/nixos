@@ -26,5 +26,5 @@ let
     };
 
 in {
-  config = mkMerge (map getUserConfig (builtins.attrNames users-list));
+  config = mkMerge (builtins.map getUserConfig users-list);
 }
