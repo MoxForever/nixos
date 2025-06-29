@@ -1,10 +1,10 @@
-{ config, lib, pkgs, ... }:
+{ config, lib, pkgs, users, ... }:
 
 let
   inherit (lib) mkIf mkMerge filterAttrs hasAttr pathExists tryEval isAttrs;
 
   defaultHomeConfig = import ./home-default.nix;
-  validUsers = filterAttrs (_: u: u.isNormalUser or false) config.users.users;
+  validUsers = filterAttrs (_: u: u.isNormalUser or false) users.users;
   isValidHomeConfig = cfg:
     isAttrs cfg &&
     hasAttr "home.username" cfg &&
