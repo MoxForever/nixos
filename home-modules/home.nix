@@ -6,7 +6,6 @@ let
   inherit (lib) mkIf mkMerge filterAttrs hasAttr pathExists tryEval isAttrs;
 
   defaultHomeConfig = import ./home-default.nix;
-  validUsers = filterAttrs (_: u: u.isNormalUser or false) users-list;
   isValidHomeConfig = cfg:
     isAttrs cfg &&
     hasAttr "home.username" cfg &&
@@ -27,5 +26,5 @@ let
     };
 
 in {
-  config = mkMerge (map getUserConfig (builtins.attrNames validUsers));
+  config = mkMerge (map getUserConfig (builtins.attrNames users-list));
 }
