@@ -1,4 +1,4 @@
-{ pkgs, users, ... }:
+{ pkgs, users, programs, ... }:
 
 {
   users.users.root.shell = pkgs.fish;
@@ -7,6 +7,8 @@
     shell = pkgs.fish;
     extraGroups = [ "networkmanager" "wheel" ];
   };
+
+  programs.fish.enable = true;
 
   imports = [
     (import ./home-modules/home.nix {
