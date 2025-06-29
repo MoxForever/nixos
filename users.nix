@@ -9,6 +9,6 @@
   };
 
   imports = [
-    (import ./home-modules/home.nix { inherit users; })
+    (import ./home-modules/home.nix { users = [ users.users.moxforever ]; })
   ];
 }
