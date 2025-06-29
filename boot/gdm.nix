@@ -1,4 +1,4 @@
-{ services, environment, pkgs, ... }:
+{ services, environment, pkg, programs, ... }:
 
 {
   services.xserver = {
