@@ -10,7 +10,12 @@
 
   imports = [
     (import ./home-modules/home.nix {
-      usersList = [ users.users.moxforever ];
+      usersList = [
+        {
+          name = "moxforever";
+          isNormalUser = true;
+        }
+      ];
     })
   ];
 }
