@@ -14,6 +14,7 @@
         inherit system;
         modules = [
           (import "${self}/configuration.nix")
+          home-manager.nixosModules.home-manager
         ];
         specialArgs = { inherit inputs; };
       };
