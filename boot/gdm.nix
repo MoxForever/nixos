@@ -6,7 +6,7 @@
     displayManager = {
       gdm = { 
         enable = true;
-        wayland = config.programs.hyprland.enable;
+        wayland = programs.hyprland.enable;
       };
       startx.enable = true;
     };
