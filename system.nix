@@ -42,7 +42,7 @@
     polkit.enable = true;
     pam.services = {
       login.enable = true;
-      gdm.enable = options.services.xserver.displayManager.gdm.enable or false;
+      gdm.enable = true;
       sshd.enable = true;
     };
   };
