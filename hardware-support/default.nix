@@ -1,7 +1,11 @@
-{ ... }:
+{ config, lib, pkgs, ... }:
 
 {
-  import = [
-    (builtins.optional (builtins.elem "nvidia" (builtins.attrNames (builtins.readDir ./.))) ./nvidia.nix)
-  ];
+  options.hardware.hasNvidiaCard = builtins.any 
+    (gpu: builtins.match ".*NVIDIA.*" gpu != null) 
+    (lib.splitString "\n" (builtins.readFile "${pkgs.pciutils}/bin/lspci"));
+
+  config = {
+    imports = lib.optional config.hardware.hasNvidiaCard ./nvidia.nix;
+  };
 }
