@@ -1,4 +1,4 @@
-{ users-list }:
+{ usersList }:
 
 { config, lib, pkgs, ... }:
 
@@ -26,5 +26,5 @@ let
     };
 
 in {
-  config = mkMerge (builtins.map getUserConfig users-list);
+  config = mkMerge (builtins.map getUserConfig usersList);
 }
