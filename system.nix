@@ -1,4 +1,4 @@
-{ boot, networking, time, i18n, system, hardware, pkgs, ... }:
+{ boot, networking, time, i18n, system, hardware, pkgs, services, ... }:
 
 {
   boot = {
