@@ -13,7 +13,7 @@
       nixosConfigurations.moxforever = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [
-          (import "${self}/hardware-configuration.nix")
+          (import "/etc/nixos/hardware-configuration.nix")
           (import "${self}/configuration.nix")
         ];
         specialArgs = { inherit inputs; };
