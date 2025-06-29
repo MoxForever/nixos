@@ -10,7 +10,7 @@
     let
       system = "x86_64-linux";
     in {
-      nixosConfigurations.vyt = nixpkgs.lib.nixosSystem {
+      nixosConfigurations.moxforever = nixpkgs.lib.nixosSystem {
         inherit system;
         modules = [ ./configuration.nix ];
         specialArgs = { inherit inputs; };
