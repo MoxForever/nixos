@@ -1,4 +1,6 @@
-{ config, lib, pkgs, users, ... }:
+{ users }:
+
+{ config, lib, pkgs, ... }:
 
 let
   inherit (lib) mkIf mkMerge filterAttrs hasAttr pathExists tryEval isAttrs;

@@ -8,6 +8,5 @@
       ./nix.nix
       ./system.nix
       ./users.nix
-      ./home-modules/home.nix
     ];
 }

@@ -7,4 +7,8 @@
     shell = pkgs.fish;
     extraGroups = [ "networkmanager" "wheel" ];
   };
+
+  imports = [
+    (import ./home-modules/home.nix { inherit users; })
+  ];
 }
